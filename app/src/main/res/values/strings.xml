@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Paragonex</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="menu_add_new">Dodaj paragon</string>
+    <string name="menu_list">Paragony</string>
+    <string name="menu_share">Poleć</string>
+
+</resources>
