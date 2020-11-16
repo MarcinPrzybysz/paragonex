@@ -1,9 +1,6 @@
-package pl.przybysz.paragonex.add_new;
+package pl.przybysz.paragonex.receipt;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,20 +8,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import androidx.fragment.app.Fragment;
+
 import pl.przybysz.paragonex.ICommunicator;
 import pl.przybysz.paragonex.R;
 import pl.przybysz.paragonex.dto.Receipt;
 
-public class AddNewFragment extends Fragment {
+public class ReceiptFragment extends Fragment {
 
     private ICommunicator communicator;
-    Receipt receipt;
 
-    Button sendBtn;
+    Button addBtn;
     EditText shop;
     EditText price;
     EditText description;
     Spinner category;
+
+    final String RECEIPT = "paragonex.receipt";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,27 +43,15 @@ public class AddNewFragment extends Fragment {
         shop = view.findViewById(R.id.tv_shop);
         price = view.findViewById(R.id.tv_price);
         description = view.findViewById(R.id.tv_description);
+        addBtn = view.findViewById(R.id.button_add);
 
-        //sending date to other Fragment
-//        communicator = (ICommunicator) getActivity();
-//        sendBtn = view.findViewById(R.id.button_add);
-//        final EditText message = view.findViewById(R.id.tv_shop);
-//
-//        sendBtn.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                communicator.passDataCom(message.getText().toString());
-//            }
-//        });
+        communicator = (ICommunicator) getActivity();
+        addBtn.setOnClickListener(view1 -> communicator.passDataToReceiptList(loadToDto()));
 
-
-        Receipt receipt = new Receipt();
-        receipt.setShop("Biedra");
-        receipt.setDescription("ddd");
-        receipt.setPrice(53.22);
-
-        loadFromDto(receipt);
+        if (getArguments() != null) {
+            Receipt receipt = getArguments().getParcelable(RECEIPT);
+            loadFromDto(receipt);
+        }
 
 
         return view;

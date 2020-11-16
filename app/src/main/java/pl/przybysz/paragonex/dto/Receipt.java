@@ -1,24 +1,40 @@
 package pl.przybysz.paragonex.dto;
 
 
-import java.time.LocalDateTime;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Receipt {
+import java.time.LocalDate;
+
+public class Receipt implements Parcelable {
 
     private String category;
     private String shop;
     private String description;
     private Double price;
-    private LocalDateTime date;
+    private LocalDate date;
 
     public Receipt() {
     }
 
-    public Receipt(String category, String shop, String description) {
+    public Receipt(String category, String shop, String description, LocalDate date) {
         this.category = category;
         this.shop = shop;
         this.description = description;
+        this.date = date;
     }
+
+    protected Receipt(Parcel in) {
+        category = in.readString();
+        shop = in.readString();
+        description = in.readString();
+        if (in.readByte() == 0) {
+            price = null;
+        } else {
+            price = in.readDouble();
+        }
+    }
+
 
     public String getCategory() {
         return category;
@@ -36,11 +52,11 @@ public class Receipt {
         this.shop = shop;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -59,4 +75,35 @@ public class Receipt {
     public void setPrice(Double price) {
         this.price = price;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(category);
+        parcel.writeString(shop);
+        parcel.writeString(description);
+        if (price == null) {
+            parcel.writeByte((byte) 0);
+        } else {
+            parcel.writeByte((byte) 1);
+            parcel.writeDouble(price);
+        }
+    }
+
+
+    public static final Creator<Receipt> CREATOR = new Creator<Receipt>() {
+        @Override
+        public Receipt createFromParcel(Parcel in) {
+            return new Receipt(in);
+        }
+
+        @Override
+        public Receipt[] newArray(int size) {
+            return new Receipt[size];
+        }
+    };
 }

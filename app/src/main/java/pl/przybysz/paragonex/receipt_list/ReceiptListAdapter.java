@@ -10,13 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import pl.przybysz.paragonex.R;
 import pl.przybysz.paragonex.dto.Receipt;
 
 public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
-
 
     private static final String TAG = "PersonListAdapter";
 
@@ -35,7 +35,7 @@ public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         String category = getItem(position).getCategory();
         String shop = getItem(position).getShop();
-//        String date = getItem(position).getDate();
+        LocalDate date = getItem(position).getDate();
 
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -47,7 +47,8 @@ public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
 
         tvCategory.setText(category);
         tvShop.setText(shop);
-//        tvDate.setText(date);
+
+        tvDate.setText(date != null ? date.toString() : null);
 
         return convertView;
     }

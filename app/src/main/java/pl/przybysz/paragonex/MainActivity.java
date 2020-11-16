@@ -2,7 +2,6 @@ package pl.przybysz.paragonex;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -12,12 +11,15 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.navigation.NavigationView;
 
-import pl.przybysz.paragonex.add_new.AddNewFragment;
+import pl.przybysz.paragonex.dto.Receipt;
+import pl.przybysz.paragonex.receipt.ReceiptFragment;
 import pl.przybysz.paragonex.receipt_list.ReceiptListFragment;
 
 public class MainActivity extends AppCompatActivity implements ICommunicator {
 
     ActionBarDrawerToggle toggle;
+    final String RECEIPT = "paragonex.receipt";
+    final String RECEIPT_LIST = "paragonex.receipt_list";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
             switch (menuItem.getItemId()) {
                 case R.id.nav_add_new:
-                    AddNewFragment addNewFragment = new AddNewFragment();
+                    ReceiptFragment addNewFragment = new ReceiptFragment();
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, addNewFragment).commit();
                     break;
                 case R.id.nav_list:
@@ -75,18 +77,34 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
     //todo: metoda do wymiany danych powmiędzy fragmentami
     @Override
-    public void passDataCom(String editTextInput) {
+    public void passDataToReceiptList(Receipt receipt) {
         Bundle bundle = new Bundle();
 
-        bundle.putString("message", editTextInput);
+//        bundle.putString(RECEIPT_LIST, receipt);
+        bundle.putParcelable(RECEIPT_LIST, receipt);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         ReceiptListFragment receiptListFragment = new ReceiptListFragment();
 
         receiptListFragment.setArguments(bundle);
 
-//        transaction.replace(R.id.fragment_container, receiptListFragment).commit();
+        transaction.replace(R.id.fragment_container, receiptListFragment).commit();
 
+    }
+
+    @Override
+    public void passDataToReceipt(Receipt receipt) {
+        Bundle bundle = new Bundle();
+
+//        bundle.putString(RECEIPT, receipt);
+        bundle.putParcelable(RECEIPT, receipt);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        ReceiptFragment receiptFragment = new ReceiptFragment();
+
+        receiptFragment.setArguments(bundle);
+
+        transaction.replace(R.id.fragment_container, receiptFragment).commit();
 
     }
 }
