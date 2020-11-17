@@ -77,7 +77,7 @@ public class ReceiptListFragment extends Fragment {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private ArrayList<Receipt> getMock() {
 
-        Receipt r1 = new Receipt("Spożywcze", "Biedronka", "Opis 1234", LocalDate.of(2020,10,25));
+        Receipt r1 = new Receipt("Dupa", "Biedronka", "Opis 1234", LocalDate.of(2020,10,25));
         Receipt r2 = new Receipt("Drogeria", "Rossman", "Opis 1234", LocalDate.of(2020,10,25));
         Receipt r3 = new Receipt("Spożywcze", "Żuczek", "2020-01-01", LocalDate.of(2020,10,25));
         Receipt r4 = new Receipt("Restauracje", "Pierogi u Zosi", "2020-01-01", LocalDate.of(2020,10,25));

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -14,10 +15,14 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import pl.przybysz.paragonex.ICommunicator;
 import pl.przybysz.paragonex.R;
 import pl.przybysz.paragonex.dto.Receipt;
+import pl.przybysz.paragonex.dto.ReceiptCategory;
 
 public class ReceiptFragment extends Fragment {
 
@@ -55,6 +60,9 @@ public class ReceiptFragment extends Fragment {
         description = view.findViewById(R.id.tv_description);
         addBtn = view.findViewById(R.id.button_add);
         datePicker = view.findViewById(R.id.datePicker);
+        category = view.findViewById(R.id.spinner_category);
+
+        category.setAdapter(new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, ReceiptCategory.values()));
 
         addBtn.setOnClickListener(view1 -> communicator.passDataToReceiptList(loadToDto()));
         if (getArguments() != null) {
@@ -74,6 +82,18 @@ public class ReceiptFragment extends Fragment {
             LocalDate date = receipt.getDate();
             datePicker.updateDate(date.getYear(), date.getMonth().getValue(), date.getDayOfMonth());
         }
+
+
+        List categories = Arrays.asList(ReceiptCategory.values());
+        try{
+            int index = categories.indexOf(ReceiptCategory.getEnumForLabel(receipt.getCategory()));
+            category.setSelection(index);
+        }catch (UnsupportedOperationException ex){
+            category.setSelection(categories.indexOf(ReceiptCategory.EMPTY));
+        }
+
+
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -83,6 +103,8 @@ public class ReceiptFragment extends Fragment {
         receipt.setDescription(description.getText().toString());
         receipt.setPrice(Double.valueOf(price.getText().toString()));
         receipt.setDate(LocalDate.of(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth()));
+
+        receipt.setCategory(category.getSelectedItem().toString());
 
         return receipt;
     }
