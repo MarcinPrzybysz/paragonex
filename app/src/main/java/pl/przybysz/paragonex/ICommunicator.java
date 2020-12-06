@@ -4,6 +4,6 @@ import pl.przybysz.paragonex.dto.Receipt;
 
 public interface ICommunicator {
 
-    void passDataToReceiptList(Receipt receipt);
+    void passDataToReceiptList();
     void passDataToReceipt(Receipt receipt);
 }

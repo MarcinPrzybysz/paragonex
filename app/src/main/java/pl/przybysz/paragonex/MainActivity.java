@@ -1,15 +1,18 @@
 package pl.przybysz.paragonex;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.FirebaseApp;
 
 import pl.przybysz.paragonex.dto.Receipt;
 import pl.przybysz.paragonex.receipt.ReceiptFragment;
@@ -21,10 +24,14 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
     final String RECEIPT = "paragonex.receipt";
     final String RECEIPT_LIST = "paragonex.receipt_list";
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseApp.initializeApp(this);
+
 
         //wysuwane menu
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -77,11 +84,11 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
     //todo: metoda do wymiany danych powmiędzy fragmentami
     @Override
-    public void passDataToReceiptList(Receipt receipt) {
+    public void passDataToReceiptList() {
         Bundle bundle = new Bundle();
 
 //        bundle.putString(RECEIPT_LIST, receipt);
-        bundle.putParcelable(RECEIPT_LIST, receipt);
+//        bundle.putParcelable(RECEIPT_LIST, receipt);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         ReceiptListFragment receiptListFragment = new ReceiptListFragment();
@@ -91,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
         transaction.replace(R.id.fragment_container, receiptListFragment).commit();
 
     }
+
+
 
     @Override
     public void passDataToReceipt(Receipt receipt) {

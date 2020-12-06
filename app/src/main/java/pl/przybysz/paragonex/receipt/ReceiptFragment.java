@@ -9,13 +9,18 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,23 +28,30 @@ import pl.przybysz.paragonex.ICommunicator;
 import pl.przybysz.paragonex.R;
 import pl.przybysz.paragonex.dto.Receipt;
 import pl.przybysz.paragonex.dto.ReceiptCategory;
+import pl.przybysz.paragonex.firebase.ReceiptService;
 
 public class ReceiptFragment extends Fragment {
 
     private ICommunicator communicator;
 
-    Button addBtn;
+    FloatingActionButton addBtn;
+    ImageButton deleteBtn;
     EditText shop;
     EditText price;
     EditText description;
     Spinner category;
     DatePicker datePicker;
+    ReceiptService service;
+
+    Receipt originalModel;
+
 
     final String RECEIPT = "paragonex.receipt";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        service = new ReceiptService();
         if (getArguments() != null) {
 
         }
@@ -58,16 +70,32 @@ public class ReceiptFragment extends Fragment {
         shop = view.findViewById(R.id.tv_shop);
         price = view.findViewById(R.id.tv_price);
         description = view.findViewById(R.id.tv_description);
-        addBtn = view.findViewById(R.id.button_add);
+        addBtn = view.findViewById(R.id.floating_button_add);
+        deleteBtn = view.findViewById(R.id.delete_button);
         datePicker = view.findViewById(R.id.datePicker);
         category = view.findViewById(R.id.spinner_category);
 
         category.setAdapter(new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, ReceiptCategory.values()));
 
-        addBtn.setOnClickListener(view1 -> communicator.passDataToReceiptList(loadToDto()));
+        addBtn.setOnClickListener(view1 -> communicator.passDataToReceiptList());
+
+        addBtn.setOnClickListener(view1 -> {
+            service.upsertReceipt(getDtoFromEditors());
+            communicator.passDataToReceiptList(); //todo zmienić
+        });
+
+        deleteBtn.setOnClickListener(view1 -> {
+            service.deleteReceipt(originalModel.getId());
+            communicator.passDataToReceiptList(); //todo zmienić
+        });
+
+
         if (getArguments() != null) {
-            Receipt receipt = getArguments().getParcelable(RECEIPT);
-            loadFromDto(receipt);
+            originalModel = getArguments().getParcelable(RECEIPT);
+            loadFromDto(originalModel);
+            deleteBtn.setVisibility(View.VISIBLE);
+        }else{
+            originalModel = new Receipt();
         }
 
         return view;
@@ -79,7 +107,7 @@ public class ReceiptFragment extends Fragment {
         price.setText(receipt.getPrice() != null ? receipt.getPrice().toString() : "0");
         description.setText(receipt.getDescription() != null ? receipt.getDescription() : "");
         if (receipt.getDate() != null) {
-            LocalDate date = receipt.getDate();
+            LocalDate date =  Instant.ofEpochMilli(receipt.getDate()).atZone(ZoneId.systemDefault()).toLocalDate();
             datePicker.updateDate(date.getYear(), date.getMonth().getValue(), date.getDayOfMonth());
         }
 
@@ -92,17 +120,21 @@ public class ReceiptFragment extends Fragment {
             category.setSelection(categories.indexOf(ReceiptCategory.EMPTY));
         }
 
-
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private Receipt loadToDto() {
+    private Receipt getDtoFromEditors() {
         Receipt receipt = new Receipt();
+        receipt.setId(originalModel.getId());
         receipt.setShop(shop.getText().toString());
         receipt.setDescription(description.getText().toString());
         receipt.setPrice(Double.valueOf(price.getText().toString()));
-        receipt.setDate(LocalDate.of(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth()));
+
+        //todo: to jest tragiczne, poprawić!
+
+        LocalDate localDate =LocalDate.of(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth());
+        Long dateInMillis = localDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+        receipt.setDate(dateInMillis);
 
         receipt.setCategory(category.getSelectedItem().toString());
 

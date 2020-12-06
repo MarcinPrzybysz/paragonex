@@ -1,6 +1,7 @@
 package pl.przybysz.paragonex.receipt_list;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import pl.przybysz.paragonex.R;
@@ -30,12 +34,19 @@ public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        String category = getItem(position).getCategory();
-        String shop = getItem(position).getShop();
-        LocalDate date = getItem(position).getDate();
+        String category = "";
+        String shop = "";
+        LocalDate date = null;
+        if(getItem(position) != null){
+            category = getItem(position).getCategory();
+            shop = getItem(position).getShop();
+            date = getItem(position).getDate() != null ? Instant.ofEpochMilli(getItem(position).getDate()).atZone(ZoneId.systemDefault()).toLocalDate() : null;
+        }
+
 
 
         LayoutInflater inflater = LayoutInflater.from(mContext);

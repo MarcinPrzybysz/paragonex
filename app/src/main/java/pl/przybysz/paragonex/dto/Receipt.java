@@ -4,20 +4,19 @@ package pl.przybysz.paragonex.dto;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.time.LocalDate;
-
 public class Receipt implements Parcelable {
 
+    private String id;
     private String category;
     private String shop;
     private String description;
     private Double price;
-    private LocalDate date;
+    private Long date;
 
     public Receipt() {
     }
 
-    public Receipt(String category, String shop, String description, LocalDate date) {
+    public Receipt(String category, String shop, String description, Long date) {
         this.category = category;
         this.shop = shop;
         this.description = description;
@@ -35,6 +34,13 @@ public class Receipt implements Parcelable {
         }
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getCategory() {
         return category;
@@ -52,11 +58,11 @@ public class Receipt implements Parcelable {
         this.shop = shop;
     }
 
-    public LocalDate getDate() {
+    public Long getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(Long date) {
         this.date = date;
     }
 
