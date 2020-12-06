@@ -2,20 +2,29 @@ package pl.przybysz.paragonex.dto;
 
 import androidx.annotation.NonNull;
 
+import pl.przybysz.paragonex.R;
+
 public enum ReceiptCategory {
-    EMPTY("-"),
-    GROCERY("Spożywcze"),
-    SPORT("Sportowe"),
-    RESTAURANT("Restauracje"),
-    ELECTRONICS("Elektronika"),
-    DRUGSTORE("Drogeria");
+    EMPTY("-", R.drawable.file),
+    GROCERY("Spożywcze", R.drawable.groceries),
+    SPORT("Sportowe", R.drawable.weights),
+    RESTAURANT("Restauracje", R.drawable.tray),
+    ELECTRONICS("Elektronika", R.drawable.iphone),
+    DRUGSTORE("Drogeria", R.drawable.shampoo),
+    PHARMACY("Leczenie", R.drawable.first_aid_kit),
+    CLOTHING("Ubrania", R.drawable.polo_shirt);
 
     private String categroyLabel;
+    private int icon;
 
-    ReceiptCategory(String categroyLabel) {
+    ReceiptCategory(String categroyLabel, int icon) {
         this.categroyLabel = categroyLabel;
+        this.icon = icon;
     }
 
+    public int getIcon() {
+        return icon;
+    }
 
     @NonNull
     @Override
