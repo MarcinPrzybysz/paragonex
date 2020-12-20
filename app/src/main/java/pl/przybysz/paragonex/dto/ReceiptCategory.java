@@ -26,7 +26,6 @@ public enum ReceiptCategory {
         return icon;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return categroyLabel;

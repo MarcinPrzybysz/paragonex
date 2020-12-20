@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
         FirebaseApp.initializeApp(this);
 
-
         //wysuwane menu
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(this, drawer, R.string.open, R.string.close);
@@ -96,15 +95,12 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
         receiptListFragment.setArguments(bundle);
 
         transaction.replace(R.id.fragment_container, receiptListFragment).commit();
-
     }
-
 
 
     @Override
     public void passDataToReceipt(Receipt receipt) {
         Bundle bundle = new Bundle();
-
 //        bundle.putString(RECEIPT, receipt);
         bundle.putParcelable(RECEIPT, receipt);
 
@@ -114,6 +110,6 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
         receiptFragment.setArguments(bundle);
 
         transaction.replace(R.id.fragment_container, receiptFragment).commit();
-
     }
+
 }
