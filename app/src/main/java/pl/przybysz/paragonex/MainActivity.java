@@ -1,5 +1,6 @@
 package pl.przybysz.paragonex;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -57,6 +58,13 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, receiptListFragment).commit();
                     break;
                 case R.id.nav_share:
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "PAragonex- super aplikacja do paragonów, polecam.");
+                    sendIntent.setType("text/plain");
+
+                    Intent shareIntent = Intent.createChooser(sendIntent, null);
+                    startActivity(shareIntent);
                     break;
 
             }
