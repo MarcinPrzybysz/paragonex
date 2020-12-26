@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import pl.przybysz.paragonex.dto.Receipt;
+import pl.przybysz.paragonex.receipt_list.ReceiptListAdapter;
 
 import static android.content.ContentValues.TAG;
 
@@ -157,7 +157,7 @@ public class ReceiptService {
     }
 
 
-    public void readAllReceipt(List<Receipt> receipts, BaseAdapter adapter) {
+    public void readAllReceipt(List<Receipt> receipts, ReceiptListAdapter adapter) {
         FirebaseFirestore.getInstance().collection("users").document(USER_ID).collection("receipts")
                 .orderBy("date")
                 .get()
@@ -173,7 +173,8 @@ public class ReceiptService {
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
-                    }
+                       adapter.refreshFilterSourceObjects();
+                }
                 });
 
     }

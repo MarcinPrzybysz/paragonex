@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import androidx.fragment.app.Fragment;
 
@@ -15,12 +17,15 @@ import java.util.List;
 import pl.przybysz.paragonex.ICommunicator;
 import pl.przybysz.paragonex.R;
 import pl.przybysz.paragonex.dto.Receipt;
+import pl.przybysz.paragonex.dto.ReceiptCategory;
 import pl.przybysz.paragonex.firebase.ReceiptService;
 
 public class ReceiptListFragment extends Fragment {
 
     private ICommunicator communicator;
-    final String RECEIPT_LIST = "paragonex.receipt_list";
+    Spinner category;
+    Spinner month;
+    Spinner year;
 
     public ReceiptListFragment() {
     }
@@ -28,18 +33,19 @@ public class ReceiptListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-
-        }
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_receipt_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_receipt_list, container, false);
 
-        ListView listView = root.findViewById(R.id.lv_receipts);
+        ListView listView = view.findViewById(R.id.lv_receipts);
+        category = view.findViewById(R.id.spinner_category);
+
+        category.setAdapter(new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, ReceiptCategory.values()));
+
 
         List<Receipt> receipts = new ArrayList<>();
         ReceiptService service = new ReceiptService();
@@ -58,7 +64,25 @@ public class ReceiptListFragment extends Fragment {
             }
         });
 
-        return root;
+
+        AdapterView.OnItemSelectedListener filterChangedListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String selectedCategory = category.getSelectedItem().toString();
+                adapter.getFilter().filter(selectedCategory);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        };
+
+        category.setOnItemSelectedListener(filterChangedListener);
+        year.setOnItemSelectedListener(filterChangedListener);
+        month.setOnItemSelectedListener(filterChangedListener);
+
+        return view;
     }
 
 

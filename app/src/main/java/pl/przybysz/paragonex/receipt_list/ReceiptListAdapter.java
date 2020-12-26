@@ -3,47 +3,53 @@ package pl.przybysz.paragonex.receipt_list;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 import pl.przybysz.paragonex.R;
 import pl.przybysz.paragonex.dto.Receipt;
 import pl.przybysz.paragonex.dto.ReceiptCategory;
 
+
 public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
 
-    private static final String TAG = "PersonListAdapter";
+    private List<Receipt> objects;
+    private Context context;
+    private Filter filter;
+    private int resourceId;
 
-    private Context mContext;
-    int mResource;
-
-
-    public ReceiptListAdapter(@NonNull Context context, int resource, @NonNull List<Receipt> objects) {
-        super(context, resource, objects);
-        mContext = context;
-        mResource = resource;
+    public ReceiptListAdapter(Context context, int resourceId, List<Receipt> objects) {
+        super(context, resourceId, objects);
+        this.context = context;
+        this.objects = objects;
+        this.resourceId = resourceId;
     }
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    public int getCount() {
+        return objects.size();
+    }
+
+    @Override
+    public Receipt getItem(int position) {
+        return objects.get(position);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
         String category = ReceiptCategory.EMPTY.toString();
         String shop = "";
         LocalDate date = null;
@@ -54,15 +60,15 @@ public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
         }
 
 
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        convertView = inflater.inflate(mResource, parent, false);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        convertView = inflater.inflate(resourceId, parent, false);
 
         TextView tvShop = (TextView) convertView.findViewById(R.id.textViewShop);
         TextView tvDate = (TextView) convertView.findViewById(R.id.textViewDate);
         LinearLayout categoryView = convertView.findViewById(R.id.category_layout);
 
 
-        categoryView.setBackground(ContextCompat.getDrawable(mContext, ReceiptCategory.getEnumForLabel(category).getIcon()));
+        categoryView.setBackground(ContextCompat.getDrawable(context, ReceiptCategory.getEnumForLabel(category).getIcon()));
 
 
         tvShop.setText(shop);
@@ -77,5 +83,63 @@ public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
         return convertView;
     }
 
+    @Override
+    public Filter getFilter() {
+        if (filter == null)
+            filter = new AppFilter<Receipt>(objects);
+        return filter;
+    }
+
+    public void refreshFilterSourceObjects() {
+        filter = new AppFilter<Receipt>(objects);
+    }
+
+
+    private class AppFilter<T> extends Filter {
+
+        private ArrayList<T> sourceObjects;
+
+        public AppFilter(List<T> objects) {
+            sourceObjects = new ArrayList<T>();
+            synchronized (this) {
+                sourceObjects.addAll(objects);
+            }
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence category) {
+            String filterSeq = category.toString().toLowerCase();
+            FilterResults result = new FilterResults();
+            if (!filterSeq.equals(ReceiptCategory.EMPTY.toString()) && filterSeq != null && filterSeq.length() > 0) {
+                ArrayList<Receipt> filter = new ArrayList<Receipt>();
+
+                for (T object : sourceObjects) {
+                    Receipt r = (Receipt) object;
+                    if (r.getCategory().equals(category))
+                        filter.add((Receipt) object);
+                }
+                result.count = filter.size();
+                result.values = filter;
+            } else {
+                synchronized (this) {
+                    result.values = sourceObjects;
+                    result.count = sourceObjects.size();
+                }
+            }
+            return result;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint,
+                                      FilterResults results) {
+            ArrayList<T> filtered = (ArrayList<T>) results.values;
+            notifyDataSetChanged();
+            clear();
+            for (int i = 0, l = filtered.size(); i < l; i++)
+                add((Receipt) filtered.get(i));
+            notifyDataSetInvalidated();
+        }
+    }
 
 }
