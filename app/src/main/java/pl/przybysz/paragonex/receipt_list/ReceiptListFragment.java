@@ -24,8 +24,6 @@ public class ReceiptListFragment extends Fragment {
 
     private ICommunicator communicator;
     Spinner category;
-    Spinner month;
-    Spinner year;
 
     public ReceiptListFragment() {
     }
@@ -79,8 +77,7 @@ public class ReceiptListFragment extends Fragment {
         };
 
         category.setOnItemSelectedListener(filterChangedListener);
-        year.setOnItemSelectedListener(filterChangedListener);
-        month.setOnItemSelectedListener(filterChangedListener);
+
 
         return view;
     }
