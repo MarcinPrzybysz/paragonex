@@ -5,15 +5,15 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_add_new"
-            android:icon="@drawable/add_to_basket"
+            android:icon="@android:drawable/ic_menu_add"
             android:title="@string/menu_add_new" />
         <item
             android:id="@+id/nav_list"
-            android:icon="@drawable/check_list"
+            android:icon="@android:drawable/ic_menu_sort_by_size"
             android:title="@string/menu_list" />
         <item
             android:id="@+id/nav_share"
-            android:icon="@drawable/connect"
+            android:icon="@android:drawable/ic_menu_share"
             android:title="@string/menu_share" />
     </group>
 
