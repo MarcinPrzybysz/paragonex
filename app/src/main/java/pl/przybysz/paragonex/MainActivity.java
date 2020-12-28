@@ -3,6 +3,7 @@ package pl.przybysz.paragonex;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -15,7 +16,9 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 
+import pl.przybysz.paragonex.dto.ParcelableString;
 import pl.przybysz.paragonex.dto.Receipt;
+import pl.przybysz.paragonex.photo_view.PhotoViewFragment;
 import pl.przybysz.paragonex.receipt.ReceiptFragment;
 import pl.przybysz.paragonex.receipt_list.ReceiptListFragment;
 
@@ -23,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
     ActionBarDrawerToggle toggle;
     final String RECEIPT = "paragonex.receipt";
+    final String PHOTO_VIEW = "paragonex.photo_view";
     final String RECEIPT_LIST = "paragonex.receipt_list";
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -60,13 +64,12 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
                 case R.id.nav_share:
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, "PAragonex- super aplikacja do paragonów, polecam.");
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Paragonex- super aplikacja do paragonów, polecam.");
                     sendIntent.setType("text/plain");
 
                     Intent shareIntent = Intent.createChooser(sendIntent, null);
                     startActivity(shareIntent);
                     break;
-
             }
             menuItem.setChecked(false);
             drawer.closeDrawers();
@@ -76,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
         ReceiptListFragment receiptListFragment = new ReceiptListFragment();
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, receiptListFragment).commit();
-
 
     }
 
@@ -117,7 +119,21 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
         receiptFragment.setArguments(bundle);
 
-        transaction.replace(R.id.fragment_container, receiptFragment).commit();
+        transaction.replace(R.id.fragment_container, receiptFragment).addToBackStack(RECEIPT).commit();
+    }
+
+    @Override
+    public void openPhotoView(ParcelableString photoPath) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(PHOTO_VIEW, photoPath);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        PhotoViewFragment photoViewFragment = new PhotoViewFragment();
+
+        photoViewFragment.setArguments(bundle);
+
+        transaction.replace(R.id.fragment_container, photoViewFragment).addToBackStack(PHOTO_VIEW).commit();
     }
 
 }

@@ -18,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="0dp"
+            android:scaleType="centerCrop"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -33,6 +34,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:visibility="gone"/>
+
+        <ImageButton
+            android:id="@+id/add_photo"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@android:drawable/ic_menu_camera"
+            app:layout_constraintBottom_toBottomOf="@+id/image_button"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <EditText
             android:id="@+id/tv_shop"

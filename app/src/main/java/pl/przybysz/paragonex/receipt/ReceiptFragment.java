@@ -18,9 +18,12 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -42,6 +45,7 @@ import java.util.List;
 
 import pl.przybysz.paragonex.ICommunicator;
 import pl.przybysz.paragonex.R;
+import pl.przybysz.paragonex.dto.ParcelableString;
 import pl.przybysz.paragonex.dto.Receipt;
 import pl.przybysz.paragonex.dto.ReceiptCategory;
 import pl.przybysz.paragonex.firebase.ReceiptService;
@@ -54,6 +58,7 @@ public class ReceiptFragment extends Fragment {
 
     FloatingActionButton addBtn;
     ImageButton deleteBtn;
+    ImageButton addPhotoBtn;
     ImageButton imageButton;
     StorageReference mStorageRef;
     EditText shop;
@@ -62,6 +67,9 @@ public class ReceiptFragment extends Fragment {
     Spinner category;
     DatePicker datePicker;
     ReceiptService service;
+//    ImageView imageView;
+
+    boolean isImageFitToScreen= true;
 
     Receipt originalModel;
     public static final int REQUEST_IMAGE_CAPTURE = 3;
@@ -111,6 +119,7 @@ public class ReceiptFragment extends Fragment {
         description = view.findViewById(R.id.tv_description);
         addBtn = view.findViewById(R.id.floating_button_add);
         deleteBtn = view.findViewById(R.id.delete_button);
+        addPhotoBtn = view.findViewById(R.id.add_photo);
         imageButton = view.findViewById(R.id.image_button);
         datePicker = view.findViewById(R.id.datePicker);
         category = view.findViewById(R.id.spinner_category);
@@ -137,7 +146,7 @@ public class ReceiptFragment extends Fragment {
             communicator.passDataToReceiptList(); //todo zmienić
         });
 
-        imageButton.setOnClickListener(view1 -> {
+        addPhotoBtn.setOnClickListener(view1 -> {
             Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             takePicture.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             File photoFile;
@@ -156,8 +165,29 @@ public class ReceiptFragment extends Fragment {
                 e.printStackTrace();
             }
         });
+
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                if(isImageFitToScreen) {
+//                    isImageFitToScreen=false;
+//                    imageButton.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT));
+//                    imageButton.setAdjustViewBounds(true);
+//                }else{
+//                    isImageFitToScreen=true;
+//                    imageButton.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT));
+//                    imageButton.setScaleType(ImageView.ScaleType.FIT_XY);
+//                }
+                if(mCurrentPhotoPath != null){
+                    communicator = (ICommunicator) getActivity();
+                    communicator.openPhotoView(new ParcelableString(mCurrentPhotoPath));
+                }
+            }
+        });
+
     }
 
+    //todo czemu tu w ogole jest pobieranie z bazy całego Receipt jak dostaliśmy je z listy..
     private void loadData() {
         if (getArguments() != null) {
             originalModel = getArguments().getParcelable(RECEIPT);
