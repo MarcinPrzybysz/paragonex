@@ -68,9 +68,7 @@ public class ReceiptFragment extends Fragment {
     Spinner category;
     DatePicker datePicker;
     ReceiptService service;
-//    ImageView imageView;
 
-    boolean isImageFitToScreen= true;
 
     Receipt originalModel;
     public static final int REQUEST_IMAGE_CAPTURE = 3;
@@ -179,7 +177,6 @@ public class ReceiptFragment extends Fragment {
 
     }
 
-    //todo czemu tu w ogole jest pobieranie z bazy całego Receipt jak dostaliśmy je z listy..
     private void loadData() {
         if (getArguments() != null) {
             originalModel = getArguments().getParcelable(RECEIPT);
@@ -267,8 +264,6 @@ public class ReceiptFragment extends Fragment {
 
 
     private File createImageFile() throws IOException {
-
-
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = Environment.getExternalStoragePublicDirectory(
@@ -298,6 +293,5 @@ public class ReceiptFragment extends Fragment {
             return true;
         }
     }
-
 
 }

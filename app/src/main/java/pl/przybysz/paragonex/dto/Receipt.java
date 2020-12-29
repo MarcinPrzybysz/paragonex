@@ -16,12 +16,6 @@ public class Receipt implements Parcelable {
     public Receipt() {
     }
 
-    public Receipt(String category, String shop, String description, Long date) {
-        this.category = category;
-        this.shop = shop;
-        this.description = description;
-        this.date = date;
-    }
 
     protected Receipt(Parcel in) {
         category = in.readString();

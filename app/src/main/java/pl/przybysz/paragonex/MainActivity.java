@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
     ActionBarDrawerToggle toggle;
     final String RECEIPT = "paragonex.receipt";
     final String PHOTO_VIEW = "paragonex.photo_view";
-    final String RECEIPT_LIST = "paragonex.receipt_list";
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -37,13 +36,11 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
         FirebaseApp.initializeApp(this);
 
-        //wysuwane menu
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(this, drawer, R.string.open, R.string.close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        //when toggle is opened and we click back toggle menu will close
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -91,13 +88,9 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
         return super.onOptionsItemSelected(item);
     }
 
-    //todo: metoda do wymiany danych powmiędzy fragmentami
     @Override
     public void passDataToReceiptList() {
         Bundle bundle = new Bundle();
-
-//        bundle.putString(RECEIPT_LIST, receipt);
-//        bundle.putParcelable(RECEIPT_LIST, receipt);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         ReceiptListFragment receiptListFragment = new ReceiptListFragment();
@@ -111,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
     @Override
     public void passDataToReceipt(Receipt receipt) {
         Bundle bundle = new Bundle();
-//        bundle.putString(RECEIPT, receipt);
         bundle.putParcelable(RECEIPT, receipt);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
