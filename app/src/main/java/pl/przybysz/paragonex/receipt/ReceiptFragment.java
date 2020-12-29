@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -100,14 +101,13 @@ public class ReceiptFragment extends Fragment {
 
 
     private void loadPhotoFromDB(Receipt receipt) {
-        File photoFile = null;
         try {
-            photoFile = createImageFile();
+            File photoFile = createImageFile();
+            service.readReceiptFile(imageButton, photoFile, service.USER_ID, receipt.getId());
         } catch (IOException ex) {
             ex.printStackTrace();
             Toast.makeText(getActivity(), "Błąd pobierania zdjęcia", Toast.LENGTH_SHORT).show();
         }
-        service.readReceiptFile(imageButton, photoFile, service.USER_ID, receipt.getId());
     }
 
     private View setComponents(LayoutInflater inflater, ViewGroup container) {
@@ -147,37 +147,29 @@ public class ReceiptFragment extends Fragment {
         });
 
         addPhotoBtn.setOnClickListener(view1 -> {
-            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            takePicture.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            File photoFile;
-            try {
-                photoFile = createImageFile();
+            if(verifyStoragePermissions(getActivity())){
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                takePicture.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                File photoFile;
+                try {
+                    photoFile = createImageFile();
+                    if (photoFile != null) {
+                        Uri photoURI = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", photoFile);
+                        takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                        startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
 
-                if (photoFile != null) {
-                    Uri photoURI = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", photoFile);
-                    takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
+                    }
+                } catch (ActivityNotFoundException e) {
 
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (ActivityNotFoundException e) {
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         });
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if(isImageFitToScreen) {
-//                    isImageFitToScreen=false;
-//                    imageButton.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT));
-//                    imageButton.setAdjustViewBounds(true);
-//                }else{
-//                    isImageFitToScreen=true;
-//                    imageButton.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT));
-//                    imageButton.setScaleType(ImageView.ScaleType.FIT_XY);
-//                }
                 if(mCurrentPhotoPath != null){
                     communicator = (ICommunicator) getActivity();
                     communicator.openPhotoView(new ParcelableString(mCurrentPhotoPath));
@@ -193,7 +185,9 @@ public class ReceiptFragment extends Fragment {
             originalModel = getArguments().getParcelable(RECEIPT);
             if (originalModel != null) {
                 loadFromDto(originalModel);
-                loadPhotoFromDB(originalModel);
+                if(verifyStoragePermissions(getActivity())) {
+                    loadPhotoFromDB(originalModel);
+                }
                 deleteBtn.setVisibility(View.VISIBLE);
             } else {
                 originalModel = new Receipt();
@@ -228,7 +222,7 @@ public class ReceiptFragment extends Fragment {
         receipt.setDescription(description.getText().toString());
         receipt.setPrice(Double.valueOf(price.getText().toString()));
 
-        LocalDate localDate = LocalDate.of(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth());
+        LocalDate localDate = LocalDate.of(datePicker.getYear(), datePicker.getMonth() + 1, datePicker.getDayOfMonth());
         Long dateInMillis = localDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
         receipt.setDate(dateInMillis);
 
@@ -273,7 +267,7 @@ public class ReceiptFragment extends Fragment {
 
 
     private File createImageFile() throws IOException {
-        verifyStoragePermissions(getActivity());
+
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -290,7 +284,7 @@ public class ReceiptFragment extends Fragment {
     }
 
 
-    public static void verifyStoragePermissions(Activity activity) {
+    public static boolean verifyStoragePermissions(Activity activity) {
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
@@ -298,6 +292,10 @@ public class ReceiptFragment extends Fragment {
                     PERMISSIONS_STORAGE,
                     REQUEST_EXTERNAL_STORAGE
             );
+            permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            return permission == PackageManager.PERMISSION_GRANTED;
+        }else{
+            return true;
         }
     }
 
