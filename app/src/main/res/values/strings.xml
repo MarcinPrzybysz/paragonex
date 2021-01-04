@@ -5,5 +5,6 @@
     <string name="menu_add_new">Dodaj paragon</string>
     <string name="menu_list">Paragony</string>
     <string name="menu_share">Poleć</string>
+    <string name="menu_about">O aplikacji</string>
 
 </resources>

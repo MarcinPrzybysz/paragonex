@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 
+import pl.przybysz.paragonex.about.AboutActivity;
 import pl.przybysz.paragonex.dto.ParcelableString;
 import pl.przybysz.paragonex.dto.Receipt;
 import pl.przybysz.paragonex.photo_view.PhotoViewFragment;
@@ -66,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
                     Intent shareIntent = Intent.createChooser(sendIntent, null);
                     startActivity(shareIntent);
+                    break;
+                case R.id.nav_about:
+                    startActivity(new Intent(this, AboutActivity.class));
                     break;
             }
             menuItem.setChecked(false);
