@@ -63,8 +63,8 @@ public class ReceiptListAdapter extends ArrayAdapter<Receipt> {
         LayoutInflater inflater = LayoutInflater.from(context);
         convertView = inflater.inflate(resourceId, parent, false);
 
-        TextView tvShop = (TextView) convertView.findViewById(R.id.textViewShop);
-        TextView tvDate = (TextView) convertView.findViewById(R.id.textViewDate);
+        TextView tvShop = convertView.findViewById(R.id.textViewShop);
+        TextView tvDate = convertView.findViewById(R.id.textViewDate);
         LinearLayout categoryView = convertView.findViewById(R.id.category_layout);
 
 

@@ -2,7 +2,6 @@ package pl.przybysz.paragonex.receipt;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -15,23 +14,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,20 +44,10 @@ public class ReceiptFragment extends Fragment {
 
     private ICommunicator communicator;
 
-    FloatingActionButton addBtn;
-    ImageButton deleteBtn;
-    ImageButton addPhotoBtn;
-    ImageButton imageButton;
-    StorageReference mStorageRef;
-    EditText shop;
-    EditText price;
-    EditText description;
-    Spinner category;
-    DatePicker datePicker;
-    ReceiptService service;
+    private ReceiptModel model;
+    private ReceiptService service;
+    private Receipt originalModel;
 
-
-    Receipt originalModel;
     public static final int REQUEST_IMAGE_CAPTURE = 3;
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -84,13 +61,13 @@ public class ReceiptFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mStorageRef = FirebaseStorage.getInstance().getReference();
         service = new ReceiptService();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        model = new ReceiptModel();
         View view = setComponents(inflater, container);
         setListeners();
         loadData();
@@ -101,7 +78,7 @@ public class ReceiptFragment extends Fragment {
     private void loadPhotoFromDB(Receipt receipt) {
         try {
             File photoFile = createImageFile();
-            service.readReceiptFile(imageButton, photoFile, service.USER_ID, receipt.getId());
+            service.readReceiptFile(model.imageButton, photoFile, service.USER_ID, receipt.getId());
         } catch (IOException ex) {
             ex.printStackTrace();
             Toast.makeText(getActivity(), "Błąd pobierania zdjęcia", Toast.LENGTH_SHORT).show();
@@ -112,63 +89,56 @@ public class ReceiptFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_receipt, container, false);
         communicator = (ICommunicator) getActivity();
 
-        shop = view.findViewById(R.id.tv_shop);
-        price = view.findViewById(R.id.tv_price);
-        description = view.findViewById(R.id.tv_description);
-        addBtn = view.findViewById(R.id.floating_button_add);
-        deleteBtn = view.findViewById(R.id.delete_button);
-        addPhotoBtn = view.findViewById(R.id.add_photo);
-        imageButton = view.findViewById(R.id.image_button);
-        datePicker = view.findViewById(R.id.datePicker);
-        category = view.findViewById(R.id.spinner_category);
+        model.shop = view.findViewById(R.id.tv_shop);
+        model.price = view.findViewById(R.id.tv_price);
+        model.description = view.findViewById(R.id.tv_description);
+        model.addBtn = view.findViewById(R.id.floating_button_add);
+        model.deleteBtn = view.findViewById(R.id.delete_button);
+        model.addPhotoBtn = view.findViewById(R.id.add_photo);
+        model.imageButton = view.findViewById(R.id.image_button);
+        model.datePicker = view.findViewById(R.id.datePicker);
+        model.category = view.findViewById(R.id.spinner_category);
 
-        category.setAdapter(new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, ReceiptCategory.values()));
+        model.category.setAdapter(new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, ReceiptCategory.values()));
         return view;
     }
 
     private void setListeners() {
-        addBtn.setOnClickListener(view1 -> communicator.passDataToReceiptList());
-
-        addBtn.setOnClickListener(view1 -> {
+        model.addBtn.setOnClickListener(view1 -> {
             if (verifyBeforeSave()) {
                 Receipt receipt = service.upsertReceipt(getDtoFromEditors());
                 if (mCurrentPhotoPath != null) {
                     service.saveReceiptFile(mCurrentPhotoPath, service.USER_ID, receipt.getId());
                 }
-                communicator.passDataToReceiptList(); //todo zmienić
+                communicator.openReceiptList();
             }
         });
 
-        deleteBtn.setOnClickListener(view1 -> {
+        model.deleteBtn.setOnClickListener(view1 -> {
             service.deleteReceipt(originalModel.getId());
-            communicator.passDataToReceiptList(); //todo zmienić
+            communicator.openReceiptList();
         });
 
-        addPhotoBtn.setOnClickListener(view1 -> {
-            if(verifyStoragePermissions(getActivity())){
+        model.addPhotoBtn.setOnClickListener(view1 -> {
+            if (verifyStoragePermissions(getActivity())) {
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 takePicture.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 File photoFile;
                 try {
                     photoFile = createImageFile();
-                    if (photoFile != null) {
-                        Uri photoURI = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", photoFile);
-                        takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                        startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
-
-                    }
-                } catch (ActivityNotFoundException e) {
-
-                } catch (IOException e) {
+                    Uri photoURI = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", photoFile);
+                    takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
 
-        imageButton.setOnClickListener(new View.OnClickListener() {
+        model.imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mCurrentPhotoPath != null){
+                if (mCurrentPhotoPath != null) {
                     communicator = (ICommunicator) getActivity();
                     communicator.openPhotoView(new ParcelableString(mCurrentPhotoPath));
                 }
@@ -179,66 +149,71 @@ public class ReceiptFragment extends Fragment {
 
     private void loadData() {
         if (getArguments() != null) {
-            originalModel = getArguments().getParcelable(RECEIPT);
-            if (originalModel != null) {
-                loadFromDto(originalModel);
-                if(verifyStoragePermissions(getActivity())) {
-                    loadPhotoFromDB(originalModel);
-                }
-                deleteBtn.setVisibility(View.VISIBLE);
-            } else {
-                originalModel = new Receipt();
+            loadDataFromParcel();
+        } else {
+            originalModel = new Receipt();
+        }
+    }
+
+    private void loadDataFromParcel() {
+        assert getArguments() != null;
+        originalModel = getArguments().getParcelable(RECEIPT);
+        if (originalModel != null) {
+            loadFromDto(originalModel);
+            if (verifyStoragePermissions(getActivity())) {
+                loadPhotoFromDB(originalModel);
             }
+            model.deleteBtn.setVisibility(View.VISIBLE);
         } else {
             originalModel = new Receipt();
         }
     }
 
     private void loadFromDto(Receipt receipt) {
-        shop.setText(receipt.getShop() != null ? receipt.getShop() : "");
-        price.setText(receipt.getPrice() != null ? receipt.getPrice().toString() : "0");
-        description.setText(receipt.getDescription() != null ? receipt.getDescription() : "");
+        model.shop.setText(receipt.getShop() != null ? receipt.getShop() : "");
+        model.price.setText(receipt.getPrice() != null ? receipt.getPrice().toString() : "0");
+        model.description.setText(receipt.getDescription() != null ? receipt.getDescription() : "");
         if (receipt.getDate() != null) {
             LocalDate date = Instant.ofEpochMilli(receipt.getDate()).atZone(ZoneId.systemDefault()).toLocalDate();
-            datePicker.updateDate(date.getYear(), date.getMonth().getValue(), date.getDayOfMonth());
+            model.datePicker.updateDate(date.getYear(), date.getMonth().getValue(), date.getDayOfMonth());
         }
 
         List categories = Arrays.asList(ReceiptCategory.values());
         try {
             int index = categories.indexOf(ReceiptCategory.getEnumForLabel(receipt.getCategory()));
-            category.setSelection(index);
+            model.category.setSelection(index);
         } catch (UnsupportedOperationException ex) {
-            category.setSelection(categories.indexOf(ReceiptCategory.EMPTY));
+            model.category.setSelection(categories.indexOf(ReceiptCategory.EMPTY));
         }
     }
 
     private Receipt getDtoFromEditors() {
         Receipt receipt = new Receipt();
         receipt.setId(originalModel.getId());
-        receipt.setShop(shop.getText().toString());
-        receipt.setDescription(description.getText().toString());
-        receipt.setPrice(Double.valueOf(price.getText().toString()));
+        receipt.setShop(model.shop.getText().toString());
+        receipt.setDescription(model.description.getText().toString());
+        receipt.setPrice(Double.valueOf(model.price.getText().toString()));
 
-        LocalDate localDate = LocalDate.of(datePicker.getYear(), datePicker.getMonth() + 1, datePicker.getDayOfMonth());
+        LocalDate localDate = LocalDate.of(model.datePicker.getYear(), model.datePicker.getMonth() + 1, model.datePicker.getDayOfMonth());
         Long dateInMillis = localDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
         receipt.setDate(dateInMillis);
 
-        receipt.setCategory(category.getSelectedItem().toString());
+        receipt.setCategory(model.category.getSelectedItem().toString());
 
         return receipt;
     }
 
     private boolean verifyBeforeSave() {
-        if (TextUtils.isEmpty(shop.getText())) {
-            shop.requestFocus();
+        if (TextUtils.isEmpty(model.shop.getText())) {
+            model.shop.requestFocus();
             Toast.makeText(getActivity(), "należy uzupełnić sklep", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (TextUtils.isEmpty(price.getText())) {
-            price.requestFocus();
+        } else if (TextUtils.isEmpty(model.price.getText())) {
+            model.price.requestFocus();
             Toast.makeText(getActivity(), "należy uzupełnić cenę", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (TextUtils.isEmpty(description.getText())) {
-            category.requestFocus();
+        } else if (TextUtils.isEmpty(model.description.getText())) {
+            model.category.requestFocus();
             Toast.makeText(getActivity(), "należy uzupełnić opis", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -248,17 +223,15 @@ public class ReceiptFragment extends Fragment {
 
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
-        switch (requestCode) {
-            case REQUEST_IMAGE_CAPTURE:
-                if (resultCode == RESULT_OK) {
-                    try {
-                        mImageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.parse(mCurrentPhotoPath));
-                        imageButton.setImageBitmap(mImageBitmap);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == RESULT_OK) {
+                try {
+                    mImageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.parse(mCurrentPhotoPath));
+                    model.imageButton.setImageBitmap(mImageBitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                break;
+            }
         }
     }
 
@@ -289,7 +262,7 @@ public class ReceiptFragment extends Fragment {
             );
             permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             return permission == PackageManager.PERMISSION_GRANTED;
-        }else{
+        } else {
             return true;
         }
     }

@@ -1,7 +1,5 @@
 package pl.przybysz.paragonex.dto;
 
-import androidx.annotation.NonNull;
-
 import pl.przybysz.paragonex.R;
 
 public enum ReceiptCategory {

@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
     }
 
     @Override
-    public void passDataToReceiptList() {
+    public void openReceiptList() {
         Bundle bundle = new Bundle();
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements ICommunicator {
 
 
     @Override
-    public void passDataToReceipt(Receipt receipt) {
+    public void openReceipt(Receipt receipt) {
         Bundle bundle = new Bundle();
         bundle.putParcelable(RECEIPT, receipt);
 

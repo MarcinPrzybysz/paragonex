@@ -58,7 +58,7 @@ public class ReceiptListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Receipt receipt = receipts.get(i);
-                communicator.passDataToReceipt(receipt);
+                communicator.openReceipt(receipt);
             }
         });
 

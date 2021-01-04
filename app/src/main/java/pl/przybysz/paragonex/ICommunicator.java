@@ -5,7 +5,7 @@ import pl.przybysz.paragonex.dto.Receipt;
 
 public interface ICommunicator {
 
-    void passDataToReceiptList();
-    void passDataToReceipt(Receipt receipt);
+    void openReceiptList();
+    void openReceipt(Receipt receipt);
     void openPhotoView(ParcelableString photoPath);
 }
