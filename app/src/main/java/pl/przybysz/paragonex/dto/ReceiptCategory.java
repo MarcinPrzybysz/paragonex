@@ -10,7 +10,8 @@ public enum ReceiptCategory {
     ELECTRONICS("Elektronika", R.drawable.iphone),
     DRUGSTORE("Drogeria", R.drawable.shampoo),
     PHARMACY("Leczenie", R.drawable.first_aid_kit),
-    CLOTHING("Ubrania", R.drawable.polo_shirt);
+    CLOTHING("Ubrania", R.drawable.polo_shirt),
+    BOOKSTORE("Księgarnia", R.drawable.open_book);
 
     private String categroyLabel;
     private int icon;
